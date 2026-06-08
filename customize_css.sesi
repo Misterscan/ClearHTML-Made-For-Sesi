@@ -1,5 +1,9 @@
 // customize_css.sesi
-// Generate a customized CSS stylesheet using `model()` based on a short need description.
+// Generate a customized CSS stylesheet using `model()` based on a short style description.
+//
+// Usage:
+//   npm run sesi customize_css.sesi                                   # no style (uses defaults)
+//   npm run sesi customize_css.sesi "dark editorial, serif headings"  # inline style arg
 
 print "Customize CSS — generating CSS for a specific website"
 print ""
@@ -8,17 +12,31 @@ let readMe = read_file("README.md")
 let chtmlExample = read_file("src/index.chtml")
 let htmlOutputExample = read_file("out/index.html")
 
-// Copy from copytheme.com and paste here, or write your own description of the design you want. 
-// Be specific about spacing, type scale, colors, and overall style. The more specific you are, the better the generated CSS will match your vision.
+// Pass your style description as the first CLI argument, e.g.:
+//   npm run sesi customize_css.sesi "warm neutrals, generous whitespace, serif headings"
+// If no argument is provided the model uses its own defaults.
 let style = ""
-let examples = "CHTML Example: " + chtmlExample + "\n\n" + "HTML Output Example: " + htmlOutputExample
-prompt need {"Spacing: Moderate padding and margins. Type scale: Base font size 16px, with clear hierarchy for headings. Overall style: " style " Target elements: body, header, nav, main-content, .content-section, links, buttons. Focus on readability and a cohesive visual design. Interactive elements (links, buttons) should have subtle hover effects."}
+if len(args) > 0 {
+  style = args[0]
+}
 
-let instruction = "You are a CSS generator. Produce a complete, valid CSS stylesheet that implements the user's need. Use CSS custom properties under :root when appropriate (colors, spacing, type scale). Target common page elements (body, header, nav, main-content, .content-section, links, buttons). The stylesheet should be compatible with ClearHTML structure ```markdown\n" + readMe + "\n```" + " and use CSS custom properties for easy theming. IMPORTANT: Output ONLY the raw CSS content with no explanations or extra text."
+if len(style) > 0 {
+  print "Style description:" 
+  print style
+} else {
+  print "No style arg provided — using model defaults."
+}
+let examples = "CHTML Example: " + chtmlExample + "\n\n" + "HTML Output Example: " + htmlOutputExample
+prompt need {"Spacing: Moderate padding and margins. Type scale: Base font size 16px, with clear hierarchy for headings. Overall style: " style " Target elements: body, header, nav, main-content, .content-section, links, buttons. Focus on readability, mobile responsiveness, and a cohesive visual design. Interactive elements (links, buttons) should have subtle hover effects."}
+print ""
+print "CSS Prompt:" 
+print to_json(need)
+print ""
+let instruction = "You are a CSS generator. Produce a complete, valid CSS stylesheet that implements the user's need. Use CSS custom properties under :root when appropriate (colors, spacing, type scale). Target common page elements (body, header, nav, main-content, .content-section, links, buttons). The stylesheet should be compatible with ClearHTML structure ```markdown\n" + readMe + "\n```" + " and use CSS custom properties for easy theming. IMPORTANT: Output ONLY the raw CSS content with no explanations, no ```css backticks, or extra text."
 
 print "Requesting CSS from model..."
 
-let css = model("gemini-3-flash-preview") {temperature: 0.7} {instruction "User need: " need examples ". Only output CSS."}
+let css = model("gemini-3-flash-preview") {thinking_level: "medium"} {instruction "User need: " need examples ". Only output CSS."}
 
 print "Received CSS preview (first 6 lines):"
 try {
