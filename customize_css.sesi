@@ -1,0 +1,42 @@
+// customize_css.sesi
+// Generate a customized CSS stylesheet using `model()` based on a short need description.
+
+print "Customize CSS — generating CSS for a specific website"
+print ""
+
+let readMe = read_file("README.md")
+let chtmlExample = read_file("src/index.chtml")
+let htmlOutputExample = read_file("out/index.html")
+
+// Copy from copytheme.com and paste here, or write your own description of the design you want. 
+// Be specific about spacing, type scale, colors, and overall style. The more specific you are, the better the generated CSS will match your vision.
+let style = ""
+let examples = "CHTML Example: " + chtmlExample + "\n\n" + "HTML Output Example: " + htmlOutputExample
+prompt need {"Spacing: Moderate padding and margins. Type scale: Base font size 16px, with clear hierarchy for headings. Overall style: " style " Target elements: body, header, nav, main-content, .content-section, links, buttons. Focus on readability and a cohesive visual design. Interactive elements (links, buttons) should have subtle hover effects."}
+
+let instruction = "You are a CSS generator. Produce a complete, valid CSS stylesheet that implements the user's need. Use CSS custom properties under :root when appropriate (colors, spacing, type scale). Target common page elements (body, header, nav, main-content, .content-section, links, buttons). The stylesheet should be compatible with ClearHTML structure ```markdown\n" + readMe + "\n```" + " and use CSS custom properties for easy theming. IMPORTANT: Output ONLY the raw CSS content with no explanations or extra text."
+
+print "Requesting CSS from model..."
+
+let css = model("gemini-3-flash-preview") {temperature: 0.7} {instruction "User need: " need examples ". Only output CSS."}
+
+print "Received CSS preview (first 6 lines):"
+try {
+  let lines = split(css, "\n")
+  let n = len(lines)
+  if n > 6 { n = 6 }
+  for i = 0 to n - 1 { print lines[i] }
+} catch (err) {
+  print "  (preview failed):" err
+}
+
+print ""
+print "Writing assets/generated.css..."
+try {
+  write_file("assets/generated.css", css)
+  print "  ✓ assets/generated.css written"
+} catch (err) {
+  print "  ✗ Failed to write assets/generated.css:" err
+}
+
+print "Done. Review assets/generated.css and include it in your pages as needed."

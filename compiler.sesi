@@ -1,0 +1,99 @@
+// compiler.sesi
+// ClearHTML Compiler — reads all .chtml files from src/, compiles each
+// to HTML via the Node parser, copies the design system, writes to out/
+
+// ── Tool definitions ───────────────────────────────────────────────────────────
+
+export fn compileFile(filename: string) {
+  let result = exec("node bin/chtml-parser.js " + "src/" + filename)
+  return result
+}
+
+export fn writeOutput(filename: string, html: string) {
+  let stem = filename
+  // strip .chtml extension by checking suffix length (6 chars)
+  let outName = exec("node -e \"process.stdout.write('" + filename + "'.replace(/\\.chtml$/, '.html'))\"")
+  let outPath = "out/" + outName
+  try {
+    write_file(outPath, html)
+    print "  ✓ wrote" outPath
+  } catch (err) {
+    print "  ✗ failed to write" outPath err
+  }
+  return outName
+}
+
+define_tool("compile_file", compileFile, "Parse a .chtml source file and return compiled HTML")
+define_tool("write_output", writeOutput, "Write compiled HTML to the out/ directory")
+
+// ── Setup ──────────────────────────────────────────────────────────────────────
+
+print ""
+print "ClearHTML Compiler"
+print "────────────────────────────────────────"
+
+try {
+  make_dir("out")
+  print "  out/ ready"
+} catch (err) {
+  print "  out/ already exists"
+}
+
+// Copy design system
+try {
+  let css = read_file("assets/clearhtml.css")
+  write_file("out/clearhtml.css", css)
+  print "  ✓ wrote out/clearhtml.css"
+} catch (err) {
+  print "  ✗ could not copy clearhtml.css:" err
+}
+
+// Copy customized CSS
+try {
+  let css = read_file("assets/generated.css")
+  write_file("out/generated.css", css)
+  print "  ✓ wrote out/generated.css"
+} catch (err) {
+  // Optional file
+}
+
+// ── Discover source files ──────────────────────────────────────────────────────
+
+let srcFiles = list_dir("src")
+let chtmlFiles = []
+
+for f in srcFiles {
+  let isChtml = exec("node -e \"process.stdout.write('" + f + "'.endsWith('.chtml') ? 'yes' : 'no')\"")
+  if isChtml == "yes" {
+    push(chtmlFiles, f)
+  }
+}
+
+print ""
+print "Found" len(chtmlFiles) "source file(s) in src/"
+print ""
+
+// ── Compile each file ──────────────────────────────────────────────────────────
+
+let compiled = 0
+let failed = 0
+
+for filename in chtmlFiles {
+  print "Compiling:" filename
+  try {
+    let html = tool_call(compile_file)(filename)
+    tool_call(write_output)(filename, html)
+    compiled = compiled + 1
+  } catch (err) {
+    print "  ✗ error compiling" filename err
+    failed = failed + 1
+  }
+}
+
+// ── Summary ────────────────────────────────────────────────────────────────────
+
+print ""
+print "────────────────────────────────────────"
+print "Done." compiled "compiled," failed "failed."
+print "Output → out/"
+print ""

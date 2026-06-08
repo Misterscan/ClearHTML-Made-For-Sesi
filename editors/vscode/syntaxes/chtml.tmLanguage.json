@@ -1,0 +1,86 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ClearHTML",
+  "scopeName": "source.chtml",
+  "patterns": [
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#attributes"
+    },
+    {
+      "include": "#braces"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.chtml",
+          "match": "(?<!:)//.*$"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.chtml",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.chtml",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "entity.name.tag.chtml",
+          "match": "\\b(page-header|page-footer|page-title|main-content|content-section|article-content|complementary-content|document|metadata|navigation|group|page)\\b"
+        },
+        {
+          "name": "entity.name.tag.chtml",
+          "match": "\\b(character-encoding|heading|paragraph|quote-block|quote-inline|emphasis|strong-importance|code-text|preformatted-text|text-fragment|link|image|audio-player|video-player|captioned-media|media-caption|list|item|data-table|table-header|table-body|row|column-heading|cell|form|field|submit-button|label)\\b"
+        }
+      ]
+    },
+    "attributes": {
+      "patterns": [
+        {
+          "match": "\\b(to|source|description|style-group|identifier|accessibility-label|relationship|open-in|submit-to|language|name|method|type|level)\\b\\s*(=)",
+          "captures": {
+            "1": {
+              "name": "entity.other.attribute-name.chtml"
+            },
+            "2": {
+              "name": "keyword.operator.assignment.chtml"
+            }
+          }
+        },
+        {
+          "name": "constant.language.chtml",
+          "match": "\\b(new-tab|bulleted|numbered|post|get|email|text|password|number|submit|required|disabled|readonly|checked|multiple|autofocus)\\b"
+        }
+      ]
+    },
+    "braces": {
+      "patterns": [
+        {
+          "name": "punctuation.section.braces.chtml",
+          "match": "[{}]"
+        }
+      ]
+    }
+  }
+}

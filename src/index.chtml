@@ -1,0 +1,99 @@
+document language="en" {
+  metadata {
+    character-encoding "utf-8"
+    page-title "Neighborhood Library"
+  }
+
+  page {
+    page-header {
+      heading level=1 "Neighborhood Library"
+
+      navigation {
+        link to="index.html" "Home"
+        link to="about.html" "About"
+      }
+    }
+
+    main-content {
+      content-section {
+        heading level=2 "Welcome"
+        paragraph "Our library is open seven days a week and free for all local residents. We carry over 40,000 titles across every genre, along with digital resources, periodicals, and community programs."
+        link to="about.html" "Learn more about us"
+      }
+
+      content-section {
+        heading level=2 "Upcoming Events"
+
+        list type="bulleted" {
+          item "Story time — Tuesday 10:00 AM"
+          item "Book club — Thursday 6:30 PM"
+          item "Teen reading workshop — Saturday 1:00 PM"
+          item "Local author talk — Saturday 3:30 PM"
+        }
+      }
+
+      content-section {
+        heading level=2 "Featured Collection"
+
+        data-table {
+          table-header {
+            row {
+              column-heading "Title"
+              column-heading "Author"
+              column-heading "Genre"
+              column-heading "Available"
+            }
+          }
+
+          table-body {
+            row {
+              cell "The Quiet Hours"
+              cell "M. Adair"
+              cell "Literary Fiction"
+              cell "Yes"
+            }
+            row {
+              cell "Root and Branch"
+              cell "S. Osei"
+              cell "History"
+              cell "No"
+            }
+            row {
+              cell "Open Water"
+              cell "K. Francis"
+              cell "Poetry"
+              cell "Yes"
+            }
+          }
+        }
+      }
+
+      content-section {
+        heading level=2 "Newsletter"
+
+        form submit-to="/subscribe" method="post" {
+          field name="name" type="text" required {
+            label "Full name"
+          }
+          field name="email" type="email" required {
+            label "Email address"
+          }
+          submit-button "Subscribe"
+        }
+      }
+
+      complementary-content {
+        heading level=3 "Library Hours"
+        list type="bulleted" {
+          item "Monday - Friday: 9 AM to 8 PM"
+          item "Saturday: 10 AM to 6 PM"
+          item "Sunday: 12 PM to 5 PM"
+        }
+      }
+    }
+
+    page-footer {
+      paragraph "© 2026 Neighborhood Library. All rights reserved."
+    }
+  }
+}

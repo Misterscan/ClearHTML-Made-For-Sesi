@@ -1,0 +1,100 @@
+document language="en" {
+  metadata {
+    character-encoding "utf-8"
+    page-title "About — Neighborhood Library"
+  }
+
+  page {
+    page-header {
+      heading level=1 "Neighborhood Library"
+
+      navigation {
+        link to="index.html" "Home"
+        link to="about.html" "About"
+      }
+    }
+
+    main-content {
+      content-section {
+        heading level=2 "About Us"
+        paragraph "The Neighborhood Library has served the local community since 1954. We are a public, non-profit institution dedicated to free access to knowledge, culture, and civic life."
+        paragraph "Our collection spans physical books, e-books, audiobooks, academic journals, local newspapers, and community archives. Every resident is welcome, and membership is always free."
+      }
+
+      content-section {
+        heading level=2 "Our Mission"
+
+        quote-block {
+          "To preserve and share the written record of human experience, and to make it freely accessible to every person in our community."
+        }
+
+        paragraph "We believe that access to information is a right, not a privilege. Our programs support early readers, adult learners, researchers, and everyone in between."
+      }
+
+      content-section {
+        heading level=2 "Staff"
+
+        article-content {
+          heading level=3 "Head Librarian"
+          paragraph "Dana Okafor has led the library since 2018, expanding the digital collection and launching the after-school reading program."
+        }
+
+        article-content {
+          heading level=3 "Collections Manager"
+          paragraph "Yuki Brennan oversees acquisitions, cataloging, and the preservation of the local history archive."
+        }
+
+        article-content {
+          heading level=3 "Community Programs"
+          paragraph "Theo Ribeiro coordinates all public programming including story time, book clubs, author talks, and literacy workshops."
+        }
+      }
+
+      content-section {
+        heading level=2 "By the Numbers"
+
+        data-table {
+          table-header {
+            row {
+              column-heading "Stat"
+              column-heading "Figure"
+            }
+          }
+
+          table-body {
+            row {
+              cell "Founded"
+              cell "1954"
+            }
+            row {
+              cell "Physical titles"
+              cell "42,000+"
+            }
+            row {
+              cell "Digital titles"
+              cell "18,000+"
+            }
+            row {
+              cell "Active cardholders"
+              cell "11,200"
+            }
+            row {
+              cell "Annual programs"
+              cell "160+"
+            }
+          }
+        }
+      }
+
+      complementary-content {
+        heading level=3 "Get in Touch"
+        paragraph "Questions, feedback, or requests? We welcome them."
+        link to="about.html" "Contact the library"
+      }
+    }
+
+    page-footer {
+      paragraph "© 2026 Neighborhood Library. All rights reserved."
+    }
+  }
+}

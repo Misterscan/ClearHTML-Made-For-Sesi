@@ -1,0 +1,40 @@
+{
+  "name": "clearhtml",
+  "displayName": "ClearHTML Language Support",
+  "description": "Syntax highlighting and language support for ClearHTML (.chtml) files",
+  "version": "1.0.0",
+  "publisher": "sesi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/misterscan/ClearHTML-Made-For-Sesi"
+  },
+  "main": "./extension.js",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "clearhtml",
+        "aliases": [
+          "ClearHTML",
+          "clearhtml"
+        ],
+        "extensions": [
+          ".chtml"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "clearhtml",
+        "scopeName": "source.chtml",
+        "path": "./syntaxes/chtml.tmLanguage.json"
+      }
+    ]
+  }
+}

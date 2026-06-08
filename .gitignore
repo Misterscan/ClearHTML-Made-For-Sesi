@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.env
+.env.keys
+.sesi_cache.json
+.sesi_chat_history.json
+.DS_Store

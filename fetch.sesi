@@ -1,0 +1,89 @@
+// fetch.sesi
+// Fetches a webpage and converts it to ClearHTML.
+//
+// Usage:
+//   node bin/sesi.js -l fetch.sesi
+//
+// Configure the target URL and output name below.
+
+// ── Config ─────────────────────────────────────────────────────────────────────
+
+let url      = "https://example.com"
+let pageName = "example"
+
+// ── Tool definitions ───────────────────────────────────────────────────────────
+
+fn convertHTML(tempPath: string) {
+  return exec("node bin/html-to-chtml.js " + tempPath)
+}
+
+fn compileFile(chtmlPath: string) {
+  return exec("node bin/chtml-parser.js " + chtmlPath)
+}
+
+define_tool("convert_html", convertHTML, "Convert a fetched HTML file to ClearHTML syntax")
+define_tool("compile_chtml", compileFile, "Compile a .chtml file to styled HTML")
+
+// ── Pipeline ───────────────────────────────────────────────────────────────────
+
+print ""
+print "ClearHTML Fetcher"
+print "────────────────────────────────────────"
+print "URL:    " url
+print "Output: src/" + pageName + ".chtml"
+print ""
+
+// Step 1: Fetch the page
+print "Fetching..."
+let rawHTML = web_get(url)
+print "  ✓ " + len(rawHTML) + " bytes received"
+
+// Step 2: Write raw HTML to temp file
+let tempPath = "_fetch_temp.html"
+try {
+  write_file(tempPath, rawHTML)
+} catch (err) {
+  print "  ✗ Could not write temp file:" err
+}
+
+// Step 3: Convert HTML → ClearHTML
+print "Converting to ClearHTML..."
+let chtmlPath = "src/" + pageName + ".chtml"
+try {
+  let chtml = tool_call(convert_html)(tempPath)
+  write_file(chtmlPath, chtml)
+  print "  ✓ Wrote " chtmlPath
+} catch (err) {
+  print "  ✗ Conversion failed:" err
+}
+
+// Step 4: Ensure out/ exists and CSS is current
+try {
+  make_dir("out")
+} catch (e) {}
+
+try {
+  let css = read_file("assets/clearhtml.css")
+  write_file("out/clearhtml.css", css)
+} catch (e) {}
+
+// Step 5: Compile ClearHTML → styled HTML
+print "Compiling to HTML..."
+let outPath = "out/" + pageName + ".html"
+try {
+  let html = tool_call(compile_chtml)(chtmlPath)
+  write_file(outPath, html)
+  print "  ✓ Wrote " outPath
+} catch (err) {
+  print "  ✗ Compile failed:" err
+}
+
+// Step 6: Clean up temp file
+try {
+  exec("rm " + tempPath)
+} catch (e) {}
+
+print ""
+print "────────────────────────────────────────"
+print "Done. Open " outPath " to view the result."
+print ""

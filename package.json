@@ -1,0 +1,26 @@
+{
+  "name": "clearhtml-made-for-sesi",
+  "version": "1.0.0",
+  "description": "An alternative authoring layer for HTML",
+  "main": "node_modules/@misterscan/sesi/dist/index.js",
+  "bin": {
+    "sesi": "node_modules/@misterscan/sesi/bin/sesi.js"},
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "sesi": "node node_modules/@misterscan/sesi/bin/sesi.js -l",
+    "compile": "node node_modules/@misterscan/sesi/bin/sesi.js -l compiler.sesi",
+    "compile:single": "node node_modules/@misterscan/sesi/bin/chtml-parser.js src/index.chtml",
+    "demo": "node node_modules/@misterscan/sesi/bin/sesi.js -l main.sesi",
+    "fetch": "node node_modules/@misterscan/sesi/bin/sesi.js -l fetch.sesi",
+    "eval": "node node_modules/@misterscan/sesi/bin/sesi.js -e",
+    "help": "node node_modules/@misterscan/sesi/bin/sesi.js -h",
+    "lint": "node node_modules/@misterscan/sesi/bin/sesi.js node_modules/@misterscan/sesi/bin/lint.sesi",
+    "encrypt": "node node_modules/@misterscan/sesi/bin/sesi.js -enc",
+    "decrypt": "node node_modules/@misterscan/sesi/bin/sesi.js -dec",
+    "extension:package": "cd editors/vscode && vsce package"
+  },
+  "dependencies": {
+    "@misterscan/sesi": "1.5.2"
+  }
+}
