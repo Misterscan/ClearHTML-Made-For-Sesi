@@ -6,86 +6,159 @@ print ""
 
 // ── Step 1: Author ClearHTML source in a prompt block ─────────────────────────
 
-prompt chtmlSource {"document language=""en"" {
+prompt chtmlSource {"document language=\"en\" {
   metadata {
-    character-encoding ""utf-8""
-    page-title ""Sesi + ClearHTML Demo""
+    character-encoding \"utf-8\"
+    page-title \"Sesi + ClearHTML Demo\"
   }
 
   page {
     page-header {
-      heading level=1 ""Sesi + ClearHTML""
+      heading level=1 \"Sesi + ClearHTML\"
 
       navigation {
-        link to=""demo.html"" ""Demo""
-        link to=""index.html"" ""Library Home""
-        link to=""about.html"" ""About""
+        link to=\"demo.html\" \"Demo\"
+        link to=\"index.html\" \"Library Home\"
+        link to=\"about.html\" \"About\"
       }
     }
 
     main-content {
-      content-section {
-        heading level=2 ""What You Are Looking At""
-        paragraph ""This page was authored in ClearHTML inside a Sesi prompt block. Sesi wrote the source to a .chtml file, the parser compiled it to HTML, and you are reading the result.""
-        link to=""index.html"" ""See the full library site""
+      content-section identifier=\"intro\" {
+        heading level=2 \"What You Are Looking At\"
+        paragraph \"This page was authored in ClearHTML inside a Sesi prompt block. Sesi wrote the source to a .chtml file, the parser compiled it to HTML, and you are reading the result.\"
+        link to=\"index.html\" \"See the full library site\"
       }
 
-      content-section {
-        heading level=2 ""The Process""
+      content-section identifier=\"process\" {
+        heading level=2 \"The Process\"
 
-        list type=""numbered"" {
-          item ""Write ClearHTML inside a Sesi prompt block""
-          item ""Sesi writes the source string to src/demo.chtml""
-          item ""exec() passes the file to bin/chtml-parser.js""
-          item ""The parser emits clean, indented HTML to stdout""
-          item ""Sesi writes the HTML to out/demo.html""
+        list type=\"numbered\" {
+          item \"Write ClearHTML inside a Sesi prompt block\"
+          item \"Sesi writes the source string to src/demo.chtml\"
+          item \"exec() passes the file to bin/chtml-parser.js\"
+          item \"The parser emits clean, indented HTML to stdout\"
+          item \"Sesi writes the HTML to out/demo.html\"
         }
       }
 
-      content-section {
-        heading level=2 ""Element Reference""
+      content-section identifier=\"features\" {
+        heading level=2 \"ClearHTML Features\"
 
-        list type=""bulleted"" {
-          item ""paragraph maps to p""
-          item ""heading with level attribute maps to h1 through h6""
-          item ""link with to attribute maps to a with href""
-          item ""image with source and description maps to img with src and alt""
-          item ""navigation maps to nav""
-          item ""list type bulleted maps to ul""
-          item ""list type numbered maps to ol""
-          item ""page-header maps to header""
-          item ""page-footer maps to footer""
-          item ""content-section maps to section""
-          item ""article-content maps to article""
-          item ""complementary-content maps to aside""
-          item ""data-table maps to table""
+        list type=\"bulleted\" {
+          item \"Readable semantic element names\"
+          item \"Explicit nesting with braces\"
+          item \"Inline elements that can be nested to any depth\"
+          item \"Special characters allowed in unquoted text\"
+          item \"All validation errors reported at once with line numbers\"
         }
       }
 
+      content-section identifier=\"element-reference\" {
+        heading level=2 \"Element Reference\"
 
-      content-section {
-        heading level=2 ""Design Principles""
-        paragraph ""ClearHTML keeps the purpose of HTML but changes the authoring experience. It replaces terse tag names with explicit semantic names so the document structure is readable without prior knowledge of HTML conventions.""
+        list type=\"bulleted\" {
+          item \"paragraph maps to p\"
+          item \"heading with level attribute maps to h1 through h6\"
+          item \"link with to attribute maps to a with href\"
+          item \"image with source and description maps to img with src and alt\"
+          item \"navigation maps to nav\"
+          item \"list type bulleted maps to ul\"
+          item \"list type numbered maps to ol\"
+          item \"page-header maps to header\"
+          item \"page-footer maps to footer\"
+          item \"content-section maps to section\"
+          item \"article-content maps to article\"
+          item \"complementary-content maps to aside\"
+          item \"data-table maps to table\"}
+      }
 
-        list type=""bulleted"" {
-          item ""paragraph instead of p""
-          item ""heading with level attribute instead of h1 through h6""
-          item ""link with to attribute instead of a href""
-          item ""image with source and description instead of img src and alt""
-          item ""navigation instead of nav""
-          item ""page-header and page-footer instead of header and footer""
+      content-section identifier=\"new-features\" {
+        heading level=2 \"New Parser Capabilities\"
+
+        article-content {
+          heading level=3 \"1. Special Characters in Unquoted Prose\"
+          paragraph \"This works now, no quotes needed! Commas, exclamation marks, parentheses (and more) all survive the tokenizer.\"
+          paragraph \"Previously, any character outside a-z, 0-9, and a small set of symbols was silently dropped. Now it's preserved.\"
+        }
+
+        article-content {
+          heading level=3 \"2. Deep Inline Nesting\"
+          paragraph { \"Run \" emphasis { code-text \"npm install\" } \" to get started, or \" emphasis { code-text \"npx sesi main.sesi\" } \" to compile immediately.\" }
+          paragraph { \"The syntax \" emphasis { strong-importance \"always\" } \" requires explicit \" code-text \"{ }\" \" braces to nest inline elements.\" }
+        }
+
+        article-content {
+          heading level=3 \"3. Mixed Content\"
+          paragraph \"Prefix text can come before a brace block:\"
+          paragraph \"Note: \" { emphasis \"the brace block follows the inline text naturally.\" }
+        }
+
+        article-content {
+          heading level=3 \"4. Links Inside Table Cells\"
+
+          data-table {
+            table-header {
+              row {
+                column-heading \"Element\"
+                column-heading \"Maps To\"
+                column-heading \"Docs\"
+              }
+            }
+            table-body {
+              row {
+                cell \"paragraph\"
+                cell \"p\"
+                cell { link to=\"index.html\" \"Reference\" }
+              }
+              row {
+                cell \"heading\"
+                cell \"h1 - h6\"
+                cell { link to=\"index.html\" \"Reference\" }
+              }
+              row {
+                cell \"link\"
+                cell \"a\"
+                cell { link to=\"index.html\" \"Reference\" }
+              }
+              row {
+                cell \"data-table\"
+                cell \"table\"
+                cell { link to=\"index.html\" \"Reference\" }
+              }
+            }
+          }
+        }
+
+        article-content {
+          heading level=3 \"5. All Errors Reported at Once\"
+          paragraph \"The validator no longer stops at the first problem. All validation errors are collected and reported together, each with a line number, so a document with multiple issues shows every issue in one pass.\"
+        }
+      }
+
+      content-section identifier=\"design\" {
+        heading level=2 \"Design Principles\"
+        paragraph \"ClearHTML keeps the purpose of HTML but changes the authoring experience. It replaces terse tag names with explicit semantic names so the document structure is readable without prior knowledge of HTML conventions.\"
+
+        list type=\"bulleted\" {
+          item \"paragraph instead of p\"
+          item \"heading with level attribute instead of h1 - h6\"
+          item \"link with to attribute instead of a href\"
+          item \"image with source and description instead of img src and alt\"
+          item \"navigation instead of nav\"
+          item \"page-header and page-footer instead of header and footer\"
         }
       }
 
       complementary-content {
-        heading level=3 ""Source""
-        paragraph ""The source for this page lives in src/demo.chtml and was generated by main.sesi.""
-        link to=""https://github.com/Misterscan/ClearHTML-Made-For-Sesi"" relationship=""noopener"" open-in=""new-tab"" ""Read the proposal""
+        heading level=3 \"Source\"
+        paragraph \"The source for this page lives in src/demo.chtml and was generated by main.sesi.\"
+        link to=\"https://github.com/Misterscan/ClearHTML-Made-For-Sesi\" relationship=\"noopener\" open-in=\"new-tab\" \"Read the proposal\"
       }
     }
 
     page-footer {
-      paragraph ""© 2026 ClearHTML. Authored in Sesi, compiled to HTML.""
+      paragraph \"© 2026 ClearHTML. Authored in Sesi, compiled to HTML.\"
     }
   }
 }"}

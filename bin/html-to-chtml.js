@@ -34,7 +34,7 @@ const TAG_MAP = {
   table: 'data-table', thead: 'table-header', tbody: 'table-body',
   tfoot: 'table-body', tr: 'row', th: 'column-heading', td: 'cell',
   form: 'form', label: 'label', button: 'submit-button',
-  input: 'field',
+  input: 'field', audio: 'audio-player', video: 'video-player',
 };
 
 const ATTR_MAP = {
@@ -44,6 +44,17 @@ const ATTR_MAP = {
   lang: 'language', action: 'submit-to', method: 'method',
   name: 'name', type: 'type',
 };
+
+// All valid ClearHTML element keywords — used to avoid starting unquoted prose with a keyword
+const KEYWORDS = new Set([
+  'document','metadata','page','page-title','character-encoding','page-header',
+  'navigation','main-content','content-section','article-content','complementary-content',
+  'page-footer','group','heading','paragraph','quote-block','quote-inline','emphasis',
+  'strong-importance','code-text','preformatted-text','text-fragment','link','image',
+  'audio-player','video-player','captioned-media','media-caption','list','item',
+  'data-table','table-header','table-body','row','column-heading','cell',
+  'form','field','submit-button','label',
+]);
 
 // Tags whose subtrees are silently dropped
 const SKIP = new Set(['script','style','link','noscript','svg','path','symbol','use',
@@ -55,7 +66,7 @@ const VOID = new Set(['area','base','br','col','embed','hr','img','input',
                       'link','meta','param','source','track','wbr']);
 
 // Inline ClearHTML elements
-const INLINE = new Set(['a','em','i','strong','b','code','q','span','img','button']);
+const INLINE = new Set(['a','em','i','strong','b','code','q','span','img','button', 'audio', 'video']);
 
 // ── HTML tokenizer ─────────────────────────────────────────────────────────────
 
@@ -188,37 +199,64 @@ function quote(str) {
   return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
 }
 
+// Determines if a string can be emitted without quotes
+function isSimple(s) {
+  if (!s || typeof s !== 'string') return false;
+  const trimmed = s.trim();
+  if (!trimmed) return false;
+  
+  // If it starts with a keyword, it MUST be quoted to avoid being parsed as an element
+  const firstWord = trimmed.split(/\s+/)[0];
+  if (KEYWORDS.has(firstWord)) return false;
+
+  // Must not contain characters that would confuse the tokenizer when unquoted
+  return !/[{}"\n]/.test(s);
+}
+
+// Determines if an attribute value can be emitted without quotes
+function isSimpleAttr(s) {
+  if (!s || typeof s !== 'string') return false;
+  // Simple word characters + basic URL/path symbols
+  return /^[a-zA-Z0-9_\-\.\/@#%?\&:]+$/.test(s);
+}
+
 function mapAttrs(tag, attrs) {
   const parts = [];
 
+  const writeAttr = (key, val) => {
+    if (val === true) parts.push(key);
+    else if (isSimpleAttr(val)) parts.push(`${key}=${val}`);
+    else parts.push(`${key}="${quote(val)}"`);
+  };
+
   // Attribute-specific logic
   if (tag === 'html' && attrs.lang) {
-    parts.push(`language="${quote(attrs.lang)}"`);
+    writeAttr('language', attrs.lang);
   }
   if ((tag === 'h1'||tag==='h2'||tag==='h3'||tag==='h4'||tag==='h5'||tag==='h6')) {
     parts.push(`level=${tag[1]}`);
   }
   if ((tag === 'ul'||tag==='ol')) {
-    parts.push(`type="${tag==='ul'?'bulleted':'numbered'}"`);
+    writeAttr('type', tag === 'ul' ? 'bulleted' : 'numbered');
   }
   if (tag === 'a' && attrs.href) {
-    parts.push(`to="${quote(attrs.href)}"`);
+    writeAttr('to', attrs.href);
     if (attrs.target === '_blank') parts.push('open-in="new-tab"');
-    if (attrs.rel) parts.push(`relationship="${quote(attrs.rel)}"`);
+    if (attrs.rel) writeAttr('relationship', attrs.rel);
   }
   if (tag === 'img') {
-    if (attrs.src) parts.push(`source="${quote(attrs.src)}"`);
+    if (attrs.src) writeAttr('source', attrs.src);
     // Enforce description (required for ClearHTML compiler accessibility check)
     const altText = attrs.alt || 'Image description';
-    parts.push(`description="${quote(altText)}"`);
+    writeAttr('description', altText);
   }
   if (tag === 'form') {
-    if (attrs.action) parts.push(`submit-to="${quote(attrs.action)}"`);
-    if (attrs.method) parts.push(`method="${quote(attrs.method)}"`);
+    if (attrs.action) writeAttr('submit-to', attrs.action);
+    if (attrs.method) writeAttr('method', attrs.method);
   }
   if (tag === 'input') {
-    if (attrs.name || attrs.id) parts.push(`name="${quote(attrs.name || attrs.id)}"`);
-    if (attrs.type) parts.push(`type="${quote(attrs.type)}"`);
+    if (attrs.name || attrs.id) writeAttr('name', attrs.name || attrs.id);
+    if (attrs.type) writeAttr('type', attrs.type);
     if (attrs.required) parts.push('required');
   }
 
@@ -227,8 +265,7 @@ function mapAttrs(tag, attrs) {
     if (['href','src','alt','lang','target','rel','action','method','type','required','name','id'].includes(k)) continue;
     const mapped = ATTR_MAP[k];
     if (!mapped) continue;
-    if (v === true) parts.push(mapped);
-    else parts.push(`${mapped}="${quote(String(v))}"`);
+    writeAttr(mapped, v);
   }
 
   return parts.length ? ' ' + parts.join(' ') : '';
@@ -267,9 +304,11 @@ function emit(node, depth, state = { insideForm: false, insideList: false }) {
     return node.children.map(c => emit(c, depth, state)).filter(Boolean).join('\n');
   }
 
-  // Raw text nodes at block level
+  // Raw text nodes
   if (node.tag === '__text__') {
-    return node.value ? `${pad}"${quote(node.value)}"` : '';
+    const val = node.value.trim();
+    if (!val) return '';
+    return isSimple(val) ? `${pad}${val}` : `${pad}"${quote(val)}"`;
   }
 
   // Skip silently
@@ -277,15 +316,17 @@ function emit(node, depth, state = { insideForm: false, insideList: false }) {
 
   // ── Special: meta charset ─────────────────────────────────────────────────
   if (node.tag === 'meta' && node.attrs.charset) {
-    return `${pad}character-encoding "${quote(node.attrs.charset)}"`;
+    const charset = quote(node.attrs.charset);
+    return `${pad}character-encoding ${isSimpleAttr(charset) ? charset : `"${charset}"`}`;
   }
   // Skip other meta tags
   if (node.tag === 'meta') return '';
 
   // ── Special: title ────────────────────────────────────────────────────────
   if (node.tag === 'title') {
-    const text = textContent(node);
-    return text ? `${pad}page-title "${quote(text)}"` : '';
+    const text = textContent(node).trim();
+    if (!text) return '';
+    return `${pad}page-title ${isSimple(text) ? text : `"${quote(text)}"`}`;
   }
 
   // Handle forms and lists states
@@ -294,95 +335,85 @@ function emit(node, depth, state = { insideForm: false, insideList: false }) {
   if (node.tag === 'ul' || node.tag === 'ol') nextState.insideList = true;
 
   // ── Special: strip the div.field-group wrapper the compiler emits ─────────
-  // The 'field' keyword already compiles to <div class="field-group">, so when
-  // converting compiled HTML back to ClearHTML we must skip this wrapper div
-  // to avoid generating a redundant outer group element.
   if (node.tag === 'div' && node.attrs.class === 'field-group') {
     return (node.children || []).map(c => emit(c, depth, nextState)).filter(Boolean).join('\n');
   }
 
   // ── Special Case: input tag ───────────────────────────────────────────────
   if (node.tag === 'input') {
-    // If input type is submit, map to submit-button
     if (node.attrs.type === 'submit') {
       const btnText = node.attrs.value || 'Submit';
-      return `${pad}submit-button "${quote(btnText)}"`;
+      return `${pad}submit-button ${isSimple(btnText) ? btnText : `"${quote(btnText)}"`}`;
     }
-    // Otherwise it maps to field. Must be inside form.
-    if (!state.insideForm) return ''; // skip orphan fields
+    if (!state.insideForm) return ''; 
   }
 
-  // ── Unknown HTML tag — emit children only ─────────────────────────────────
   let chtmlTag = TAG_MAP[node.tag];
   if (!chtmlTag) {
     const inner = (node.children || []).map(c => emit(c, depth, nextState)).filter(Boolean).join('\n');
     return inner || '';
   }
 
-  // ── Special Case: item tag (li) ───────────────────────────────────────────
   if (chtmlTag === 'item' && !state.insideList) {
-    // Convert orphan items to paragraphs to pass compiler validation
     chtmlTag = 'paragraph';
   }
 
-  // ── Special Case: link tag (a) ────────────────────────────────────────────
   if (chtmlTag === 'link') {
-    if (!node.attrs.href) return ''; // skip empty/destinationless links
-    const linkText = textContent(node);
-    if (!linkText && (!node.children || !node.children.length)) {
-      return ''; // skip empty links to pass compiler validation
-    }
+    if (!node.attrs.href) return '';
+    const linkText = textContent(node).trim();
+    if (!linkText && (!node.children || !node.children.length)) return '';
   }
 
   const attrStr = mapAttrs(node.tag, node.attrs);
 
   // ── Self-closing: image / field ───────────────────────────────────────────
   if (node.tag === 'img') {
-    if (!node.attrs.src) return ''; // skip sourceless images
+    if (!node.attrs.src) return '';
     return `${pad}image${attrStr}`;
   }
   if (node.tag === 'input') {
     const labelNode = (node.children || []).find(c => c.tag === 'label');
-    const labelText = labelNode ? textContent(labelNode) : '';
+    const labelText = labelNode ? textContent(labelNode).trim() : '';
 
     if (labelText) {
-      return `${pad}field${attrStr} {\n${pad}  label "${quote(labelText)}"\n${pad}}`;
+      const labelValue = isSimple(labelText) ? labelText : `"${quote(labelText)}"`;
+      return `${pad}field${attrStr} {\n${pad}  label ${labelValue}\n${pad}}`;
     }
 
-  return `${pad}field${attrStr}`;
-}
-
-  // ── Force-block containers: always emit children as block items ───────────
-  if (FORCE_BLOCK.has(node.tag) && node.children && node.children.length > 0) {
-    const inner = node.children.map(c => emit(c, depth + 1, nextState)).filter(Boolean).join('\n');
-    if (!inner.trim()) return '';
-    return `${pad}${chtmlTag}${attrStr} {\n${inner}\n${pad}}`;
+    return `${pad}field${attrStr}`;
   }
 
-  // ── Leaf elements: pure text only ─────────────────────────────────────────
-  const hasOnlyText = !node.children || node.children.every(c => c.tag === '__text__');
-  const text = textContent(node);
+  // ── Elements that support mixed inline content without flattening ─────────
+  const INLINE_CONTAINERS = new Set([
+    'paragraph', 'emphasis', 'strong-importance', 'quote-inline',
+    'code-text', 'text-fragment', 'link', 'item', 'cell', 'column-heading', 'media-caption'
+  ]);
 
-  if (hasOnlyText && text) {
-    return `${pad}${chtmlTag}${attrStr} "${quote(text)}"`;
-  }
-
-  // ── Mixed inline content: collapse to text if all inline ──────────────────
-  if (isPureInline(node) && !FORCE_BLOCK.has(node.tag) && text) {
-    return `${pad}${chtmlTag}${attrStr} "${quote(text)}"`;
+  if (INLINE_CONTAINERS.has(chtmlTag)) {
+    // If it's pure text, use the simple trailing syntax
+    if (isPureInline(node)) {
+      const text = textContent(node).trim();
+      if (text) {
+        return `${pad}${chtmlTag}${attrStr} ${isSimple(text) ? text : `"${quote(text)}"`}`;
+      }
+    }
+    // Otherwise, use a block to allow nested inline elements
+    const inner = (node.children || []).map(c => emit(c, 0, nextState)).filter(Boolean).join(' ');
+    if (inner) {
+      return `${pad}${chtmlTag}${attrStr} { ${inner} }`;
+    }
+    return `${pad}${chtmlTag}${attrStr}`;
   }
 
   // ── Block with children ───────────────────────────────────────────────────
   if (node.children && node.children.length > 0) {
     const inner = node.children.map(c => emit(c, depth + 1, nextState)).filter(Boolean).join('\n');
-    if (!inner.trim()) {
-      return text ? `${pad}${chtmlTag}${attrStr} "${quote(text)}"` : '';
-    }
+    if (!inner.trim()) return `${pad}${chtmlTag}${attrStr}`;
     return `${pad}${chtmlTag}${attrStr} {\n${inner}\n${pad}}`;
   }
 
   // ── Empty element ─────────────────────────────────────────────────────────
-  return text ? `${pad}${chtmlTag}${attrStr} "${quote(text)}"` : '';
+  return `${pad}${chtmlTag}${attrStr}`;
 }
 
 // Helper to reconstruct form fields by pairing <label> with following <input>

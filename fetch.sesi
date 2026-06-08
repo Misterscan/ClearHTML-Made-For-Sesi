@@ -30,13 +30,13 @@ print ""
 print "ClearHTML Fetcher"
 print "────────────────────────────────────────"
 print "URL:    " url
-print "Output: src/" + pageName + ".chtml"
+print "Output: src/" pageName ".chtml"
 print ""
 
 // Step 1: Fetch the page
 print "Fetching..."
 let rawHTML = web_get(url)
-print "  ✓ " + len(rawHTML) + " bytes received"
+print "  ✓ " len(rawHTML) " bytes received"
 
 // Step 2: Write raw HTML to temp file
 let tempPath = "_fetch_temp.html"

@@ -64,9 +64,10 @@ Compiles to standard, valid HTML with the full ClearHTML design system injected 
 |   └── generated.css       ← Custom overrides (optional)
 │
 ├── bin/
+│   ├── chtml.js            ← Unified CLI tool (build, watch, lint, etc.)
 │   └── chtml-parser.js     ← Node.js ClearHTML tokenizer & HTML generator
 │
-├── generate_css.sesi       ← Generate custom CSS styles using Sesi
+├── customize_css.sesi       ← Generate custom CSS styles using Sesi
 ├── compiler.sesi           ← Sesi compiler: discovers `src/*.chtml`, compiles all
 ├── main.sesi               ← Demo: creates ClearHTML inside a Sesi prompt block
 └── ClearHTML-Proposal.md   ← Full language specification
@@ -75,29 +76,70 @@ Compiles to standard, valid HTML with the full ClearHTML design system injected 
 ## Requirements
 
 - Node.js (v16+ recommended)
-- npm (or an equivalent Node package manager)
-- Sesi runtime (included after running `npm install` this repo's `node_modules` folder)
+- Sesi runtime (included in `node_modules` after `npm install`)
 
 ---
 
 ## Getting Started
 
-
 ### Quick Setup
 
-Install dependencies (if any are required by local tooling):
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### Compile all `.chtml` files in `src/`
+### Global CLI Setup (Optional)
+
+To use the `chtml` command from anywhere in your terminal, run:
 
 ```bash
-npm run compile
+npm link
 ```
 
-This reads every `.chtml` file in `src/`, compiles each to HTML via `bin/chtml-parser.js`, copies the design system CSS from `assets/`, and writes everything to `out/`.
+*Note: On some systems, you may need to use `npm link --force` if there are naming conflicts with existing tools.*
+
+### The `chtml` CLI
+
+ClearHTML provides a unified CLI tool to manage your project:
+
+```bash
+# Compile all files in src/ to out/
+npm run build
+
+# Watch src/ for changes and recompile automatically
+npm run watch
+
+# Run the syntax auditor on all chtml and sesi files
+npm run lint
+
+# Fetch remote content
+npm run fetch
+
+# Generate custom CSS via Sesi
+npm run customize
+```
+
+### Direct CLI usage
+
+If you have the binary linked or use `node`:
+
+```bash
+chtml build
+chtml watch
+chtml lint
+```
+
+---
+
+## Key Features
+
+- **Semantic First**: Uses descriptive keywords like `main-content` and `content-section` instead of generic tags.
+- **Component System**: Reusable markup with `define-component` and `slot`.
+- **Integrated Tooling**: Native Sesi scripts for building, watching, and linting.
+- **AI-Powered Styling**: Customize your design system via natural language prompts using `customize_css.sesi`.
+- **Source Mapping**: Every generated element can be mapped back to its source line/column for easy debugging.
 
 ### Create a page inline (Sesi prompt block mode)
 
@@ -155,7 +197,7 @@ let html = exec("node bin/chtml-parser.js src/my-page.chtml")
 write_file("out/my-page.html", html)
 ```
 
-> **Note:** Avoid `=`, `©`, `:`, and raw URLs in unquoted content inside prompt blocks — the tokenizer treats them as delimiters. Use standalone `.chtml` files for content with special characters.
+> **Note:** Most special characters (like `©`, `:`, `?`, `&`) and raw URLs are now supported in unquoted content. However, avoid `=` in unquoted prose, as the parser may mistake it for an element attribute. Use quotes for content containing equals signs.
 
 ---
 

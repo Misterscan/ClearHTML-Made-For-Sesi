@@ -5,7 +5,11 @@
 // ── Tool definitions ───────────────────────────────────────────────────────────
 
 export fn compileFile(filename: string) {
-  let result = exec("node bin/chtml-parser.js " + "src/" + filename)
+  let debug = ""
+  for a in args {
+    if a == "--debug" { debug = " --debug" }
+  }
+  let result = exec("node bin/chtml-parser.js " + "src/" + filename + debug)
   return result
 }
 

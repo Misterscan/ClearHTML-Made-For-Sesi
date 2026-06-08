@@ -609,7 +609,7 @@ if len(args) > 0 {
   let parts = split(arg0, ".")
   let ext = parts[len(parts) - 1]
   
-  if ext == "sesi" {
+  if ext == "sesi" || ext == "chtml" {
     push(targetFiles, arg0)
     isSingleFile = true
   } else {
@@ -618,7 +618,7 @@ if len(args) > 0 {
       for file in files {
         let fparts = split(file, ".")
         let fext = fparts[len(fparts) - 1]
-        if fext == "sesi" {
+        if fext == "sesi" || fext == "chtml" {
           if file != "lint.sesi" {
             let path = file
             if arg0 != "." {
@@ -633,14 +633,14 @@ if len(args) > 0 {
     }
   }
 } else {
-  let targetDirs = [".", "main", "chatbot"]
+  let targetDirs = [".", "main", "chatbot", "src"]
   for dir in targetDirs {
     try {
       let files = list_dir(dir)
       for file in files {
         let fparts = split(file, ".")
         let fext = fparts[len(fparts) - 1]
-        if fext == "sesi" {
+        if fext == "sesi" || fext == "chtml" {
           if file != "lint.sesi" {
             let path = file
             if dir != "." {
@@ -666,10 +666,29 @@ if isSingleFile == false {
 }
 
 for filePath in targetFiles {
+  let parts = split(filePath, ".")
+  let ext = parts[len(parts) - 1]
+
   if isSingleFile == false {
     report = report + "## Auditing: " + filePath + "\n\n"
   } else {
     report = report + "Auditing: " + filePath + "\n\n"
+  }
+  
+  if ext == "chtml" {
+    try {
+      let result = exec("node bin/chtml-parser.js " + filePath)
+      report = report + "  ✓ No critical ClearHTML syntax errors.\n"
+    } catch (err) {
+      let errLines = split(err, "\n")
+      for eLine in errLines {
+        if len(eLine) > 0 {
+          report = report + "* 🔴 " + eLine + "\n"
+          totalErrors = totalErrors + 1
+        }
+      }
+    }
+    continue
   }
   
   try {
@@ -803,7 +822,7 @@ if isSingleFile {
   print "  Warnings: " totalWarnings " ⚠️"
 } else {
   report = report + "### Workspace Summary\n\n"
-  report = report + "* **Total Sesi Files Audited:** " + str(len(targetFiles)) + "\n"
+  report = report + "* **Total Files Audited:** " + str(len(targetFiles)) + "\n"
   report = report + "* **Total Errors:** " + str(totalErrors) + " 🔴\n"
   report = report + "* **Total Warnings:** " + str(totalWarnings) + " ⚠️\n"
   

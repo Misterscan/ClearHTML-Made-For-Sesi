@@ -55,7 +55,8 @@ The design system lives in `assets/clearhtml.css`.
 1.  **Fork** the repository.
 2.  **Clone** your fork locally.
 3.  **Install dependencies**: `npm install`.
-4.  **Create a branch** for your changes.
+4.  **Setup CLI tool**: `npm link`.
+5.  **Create a branch** for your changes.
 5.  **Run tests**: `npm run sesi bin/test-runner.sesi`.
 6.  **Commit** with descriptive messages.
 7.  **Push** to your fork and **open a Pull Request**.

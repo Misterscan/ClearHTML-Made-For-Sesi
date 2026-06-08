@@ -197,7 +197,77 @@ form submit-to="/subscribe" method="post" {
 }
 ```
 
-### Field Types
+---
+
+## Components
+
+ClearHTML supports a powerful component system for reusable markup blocks.
+
+### Defining a Component
+
+Use `define-component` at the top level of your document:
+
+```clearhtml
+define-component "user-profile" {
+  group style-group="profile-card" {
+    heading level=3 { slot }
+    paragraph "User description goes here."
+  }
+}
+```
+
+- The `slot` element is a placeholder where children passed to the component will be injected.
+
+### Using a Component
+
+```clearhtml
+use-component "user-profile" {
+  "John Doe"
+}
+```
+
+This expands to:
+```html
+<div class="profile-card">
+  <h3>John Doe</h3>
+  <p>User description goes here.</p>
+</div>
+```
+
+---
+
+## Comments
+
+ClearHTML supports both single-line and multi-line comments. These are preserved and converted into standard HTML comments (`<!-- ... -->`).
+
+```clearhtml
+// This is a single-line comment
+
+/* 
+   This is a 
+   multi-line comment
+*/
+```
+
+---
+
+## Debugging & Source Maps
+
+The ClearHTML compiler automatically tracks line and column information for every element. When running in debug mode, it injects metadata attributes into the output:
+
+```bash
+# Run with debug flag
+node bin/chtml-parser.js src/index.chtml --debug
+```
+
+Output:
+```html
+<p data-source-line="42" data-source-col="5">Paragraph text</p>
+```
+
+---
+
+## Attribute Mapping Reference
 
 - `text` — single-line text input (default)
 - `email` — email validation
@@ -307,8 +377,8 @@ Use CSS custom properties for theming:
 ```bash
 npm run compile                                    # Compile all .chtml files
 node bin/chtml-parser.js src/file.chtml            # Compile single file
-node bin/sesi.js -l main.sesi                      # Run Sesi script
-node bin/sesi.js -l customize_css.sesi             # Generate custom CSS
+npm run demo                                       # Run demo
+chtml "your-detailed-prompt"                       # Generate custom CSS
 ```
 
 ---

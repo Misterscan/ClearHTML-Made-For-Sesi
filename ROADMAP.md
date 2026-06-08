@@ -18,6 +18,7 @@ A living document outlining planned features, improvements, and future direction
 ## Phase 1: Foundation (Current)
 
 ### Parser & Compiler
+
 - [x] Recursive descent tokenizer
 - [x] Full AST validation
 - [x] HTML generation with semantic elements
@@ -25,6 +26,7 @@ A living document outlining planned features, improvements, and future direction
 - [x] File discovery and batch compilation
 
 ### Design System
+
 - [x] Typography system (Bricolage Grotesque + DM Sans)
 - [x] Color palette and tokens
 - [x] Component styling (header, nav, main, footer, forms, tables, lists)
@@ -32,6 +34,7 @@ A living document outlining planned features, improvements, and future direction
 - [x] Micro-interactions (hover states, transitions)
 
 ### Tooling
+
 - [x] Sesi script orchestration
 - [x] AI-powered CSS generation
 - [x] Error reporting and validation
@@ -42,26 +45,27 @@ A living document outlining planned features, improvements, and future direction
 ## Phase 2: Expansion (Planned)
 
 ### Language Features
-- [ ] Variables and computed values in ClearHTML
-- [ ] Template/macro system for reusable components
-- [ ] Conditional rendering (`if`/`else`)
-- [ ] Loop support for repeated elements
-- [ ] Comments and metadata preservation
+
+- [x] Template/macro system for reusable components (`define-component`, `use-component`, `slot`)
+- [x] Comments and metadata preservation (`//`, `/* */`, and source mapping)
 
 ### Parser Improvements
-- [ ] Better error messages with line/column information
+
+- [x] Better error messages with line/column information
 - [ ] Streaming compilation for large files
-- [ ] Source map generation for debugging
-- [ ] Linting rules and warnings (`bin/lint.sesi` integration)
+- [x] Source map generation for debugging (via data-source-line attributes)
+- [x] Linting rules and warnings (`bin/lint.sesi` integration)
 
 ### Tooling & Workflow
-- [ ] Watch mode for live recompilation
+
+- [x] Watch mode for live recompilation
 - [ ] Hot reload support for development
 - [ ] Build optimization (minification, tree-shaking)
 - [ ] Asset pipeline integration
-- [ ] CLI tool with subcommands (`chtml build`, `chtml serve`, `chtml lint`)
+- [x] CLI tool with subcommands (`chtml build`, `chtml fetch`, `chtml lint`)
 
 ### Ecosystem
+
 - [ ] NPM package for the parser and compiler
 - [ ] Language server protocol (LSP) for better IDE support
 - [ ] Additional editor extensions (Sublime, Vim, etc.)
@@ -73,22 +77,26 @@ A living document outlining planned features, improvements, and future direction
 ## Phase 3: Advanced (Future)
 
 ### Framework Integration
+
 - [ ] React/Vue component generation from ClearHTML
 - [ ] Backend template engines (Django, Rails, etc.)
 - [ ] JAMstack and headless CMS support
 
 ### Performance & Scale
+
 - [ ] Parallel compilation for large projects
 - [ ] Incremental builds
 - [ ] Caching layer for unchanged files
 - [ ] Benchmarking suite
 
 ### Analytics & Observability
+
 - [ ] Build performance metrics
 - [ ] Compilation statistics and reports
-- [ ] Usage analytics (optional telemetry)
+- [ ] Usage analytics (optional)
 
-### AI & Automation
+### Automation
+
 - [ ] Auto-generation of ClearHTML from plain text prompts
 - [ ] Accessibility auditing and suggestions
 - [ ] Content-aware styling recommendations
@@ -99,16 +107,19 @@ A living document outlining planned features, improvements, and future direction
 ## Known Issues & Limitations
 
 ### Parser
-- Cannot easily handle deeply nested content due to tokenizer design
-- Limited error recovery — parsing stops at first syntax error
-- Special characters in unquoted prompt blocks need workarounds
+
+- ~~Cannot easily handle deeply nested content due to tokenizer design~~ — **fixed:** inline elements (`emphasis`, `code-text`, etc.) removed from `LEAF_ELEMENTS`; `{ }` children now work at any depth
+- ~~Limited error recovery — parsing stops at first syntax error~~ — **fixed:** validator now accumulates all errors and reports them together with line numbers
+- ~~Special characters in unquoted prompt blocks need workarounds~~ — **fixed:** `PUNC` token type added; `!`, `,`, `'`, `(`, `)`, etc. now preserved in unquoted prose
 
 ### Design System
+
 - Only tested at a single responsive breakpoint (640px mobile)
 - Font loading via Google Fonts — no offline fallback provided
 - Color palette hardcoded; theming requires CSS variable overrides
 
 ### Customization
+
 - `customize_css.sesi` requires network access (Gemini API call)
 - Generated CSS may not perfectly match user intent on first try
 - No versioning or diff tracking for CSS changes
