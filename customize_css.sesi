@@ -2,13 +2,15 @@
 // Generate a customized CSS stylesheet using `model()` based on a short style description.
 //
 // Usage:
-//   npm run sesi customize_css.sesi                                   # no style (uses defaults)
+//   npm run sesi customize_css.sesi                                   # no style (uses default)
 //   npm run sesi customize_css.sesi "dark editorial, serif headings"  # inline style arg
 
 print "Customize CSS — generating CSS for a specific website"
 print ""
 
-let readMe = read_file("README.md")
+let readMe = read_file("SPECIFICATION.md")
+// Example CHTML and HTML output for the model to reference when generating CSS
+// Replace with your own examples as needed. The more relevant the examples, the better the generated CSS will match your needs.
 let chtmlExample = read_file("src/index.chtml")
 let htmlOutputExample = read_file("out/index.html")
 
@@ -24,7 +26,10 @@ if len(style) > 0 {
   print "Style description:" 
   print style
 } else {
-  print "No style arg provided — using model defaults."
+  let styleDefault = "Beautiful, premium modern UX design. Colors: Dynamic sky blues, dandelion yellows, and tangerine oranges, soft ambient background gradients. Dark mode (charcoal backgrounds, light text) with vibrant accent colors. Rounded corners and subtle shadows for depth. A polished and visually engaging style that elevates the user experience."
+  print "No style provided, using default:"
+  print styleDefault
+  style = styleDefault
 }
 let examples = "CHTML Example: " + chtmlExample + "\n\n" + "HTML Output Example: " + htmlOutputExample
 prompt need {"Spacing: Moderate padding and margins. Type scale: Base font size 16px, with clear hierarchy for headings. Overall style: " style " Target elements: body, header, nav, main-content, .content-section, links, buttons. Focus on readability, mobile responsiveness, and a cohesive visual design. Interactive elements (links, buttons) should have subtle hover effects."}
@@ -32,11 +37,15 @@ print ""
 print "CSS Prompt:" 
 print to_json(need)
 print ""
-let instruction = "You are a CSS generator. Produce a complete, valid CSS stylesheet that implements the user's need. Use CSS custom properties under :root when appropriate (colors, spacing, type scale). Target common page elements (body, header, nav, main-content, .content-section, links, buttons). The stylesheet should be compatible with ClearHTML structure ```markdown\n" + readMe + "\n```" + " and use CSS custom properties for easy theming. IMPORTANT: Output ONLY the raw CSS content with no explanations, no ```css backticks, or extra text."
+let instruction = "You are a CSS generator. Produce a complete, valid CSS stylesheet that implements the user's need. Use CSS custom properties under :root when appropriate (colors, spacing, type scale). Target common page elements (body, header, nav, main-content, .content-section, links, buttons). The stylesheet should be compatible with ClearHTML structure ```markdown\n" + readMe + "\n```" + " and use CSS custom properties for easy theming. IMPORTANT: Don't forget to include the `background-clip` property. Output ONLY the raw CSS content with no explanations, no ```css backticks, or extra text."
 
 print "Requesting CSS from model..."
 
-let css = model("gemini-3-flash-preview") {thinking_level: "medium"} {instruction "User need: " need examples ". Only output CSS."}
+// Change the model and parameters as needed. gemini-3-flash-preview is a good choice for code generation tasks, but feel free to experiment with other models or settings.
+// gemini-3.5-flash for higher quality but token hungry, or gemini-3.1-pro-preview for a more polished and refined output.
+// Both may take slightly longer than gemini-3-flash-preview, but can produce higher quality CSS with better adherence to best practices and design principles.
+// Note: We set cache: false to ensure we get a fresh response each time, which is important during development when you may be iterating on the style description.
+let css = model("gemini-3-flash-preview") {search, thinking_level: "low", max_tokens: 8192, cache: false} {instruction "User need: " need examples ". Only output CSS."}
 
 print "Received CSS preview (first 6 lines):"
 try {
