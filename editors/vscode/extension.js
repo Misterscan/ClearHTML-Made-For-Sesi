@@ -73,8 +73,8 @@ const DOCS = {
   },
   'image': {
     html: '<img>',
-    desc: 'An image element. Source path/URL is specified by `source` and alt text by `description`.',
-    example: 'image source="logo.png" description="Company Logo"'
+    desc: 'An image element. Source path/URL is specified by `source` and alt text by `description`. Optional `width` and `height` can also be provided.',
+    example: 'image source="logo.png" description="Company Logo" width="200" height="100"'
   },
   'list': {
     html: '<ul> or <ol>',

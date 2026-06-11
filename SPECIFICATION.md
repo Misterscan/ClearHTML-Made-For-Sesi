@@ -296,6 +296,8 @@ ClearHTML attributes map to HTML equivalents:
 | `source="..."`           | `src`            | `image source="/pic.jpg"` |
 | `description="..."`      | `alt`            | `image description="A photo"` |
 | `style-group="..."`      | `class`          | `paragraph style-group="highlight"` |
+| `width="..."`            | `width`          | `image width="600" ...` |
+| `height="..."`           | `height`         | `image height="400" ...` |
 | `identifier="..."`       | `id`             | `group identifier="top"` |
 | `accessibility-label="..."` | `aria-label`    | `link accessibility-label="Skip to content"` |
 | `relationship="..."`     | `rel`            | `link relationship="nofollow"` |
@@ -378,6 +380,9 @@ Use CSS custom properties for theming:
 npm run compile                                    # Compile all .chtml files
 node bin/chtml-parser.js src/file.chtml            # Compile single file
 npm run demo                                       # Run demo
+
+# Run npm link for access to the CLI tool
+npm link
 chtml "your-detailed-prompt"                       # Generate custom CSS
 ```
 

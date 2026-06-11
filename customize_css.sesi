@@ -45,7 +45,7 @@ print "Requesting CSS from model..."
 // gemini-3.5-flash for higher quality but token hungry, or gemini-3.1-pro-preview for a more polished and refined output.
 // Both may take slightly longer than gemini-3-flash-preview, but can produce higher quality CSS with better adherence to best practices and design principles.
 // Note: We set cache: false to ensure we get a fresh response each time, which is important during development when you may be iterating on the style description.
-let css = model("gemini-3-flash-preview") {search, thinking_level: "low", max_tokens: 8192, cache: false} {instruction "User need: " need examples ". Only output CSS."}
+let css = model("gemini-3-flash-preview") {search, thinkingLevel: "low", max_tokens: 8192, cache: false} {instruction "User need: " need examples ". Only output CSS."}
 
 print "Received CSS preview (first 6 lines):"
 try {
